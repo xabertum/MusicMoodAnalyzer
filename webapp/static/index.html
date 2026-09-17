@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Analizador de Emoción Musical</title>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <main class="page">
+    <h1>Analizador de Emoción Musical</h1>
+    <p class="subtitle">Sube una canción (.wav, .mp3, .flac, .ogg, .m4a) y el modelo predecirá su emoción dominante.</p>
+
+    <form id="uploadForm" class="upload-card">
+      <div id="dropZone" class="drop-zone">
+        <svg class="drop-zone-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+        <p class="drop-zone-text">Arrastra un archivo de audio aquí, o</p>
+        <label for="audioInput" class="drop-zone-browse">elige un archivo</label>
+        <input type="file" id="audioInput" name="file" accept=".wav,.mp3,.flac,.ogg,.m4a" required>
+        <p id="fileName" class="drop-zone-filename" hidden></p>
+      </div>
+      <button type="submit" id="analyzeBtn">Analizar</button>
+    </form>
+
+    <p id="loading" class="status" hidden>Procesando audio… puede tardar entre 10 y 30 segundos.</p>
+    <p id="error" class="status error" hidden></p>
+
+    <section id="result" class="viz-root" hidden>
+      <h2 class="winner-label">Emoción predominante: <span id="winnerName"></span></h2>
+      <div id="chart" class="chart"></div>
+    </section>
+
+    <details class="about-model">
+      <summary>Sobre el modelo</summary>
+      <p>
+        Red neuronal <strong>CNN + BiLSTM con Attention</strong> (Keras), entrenada para
+        clasificar canciones en Alegre / Neutra / Triste a partir de
+        características de audio (<code>openSMILE ComParE_2016</code>,
+        descriptores de bajo nivel). Se entrenó con el dataset
+        <strong>DEAM</strong> (1802 canciones anotadas en valencia/activación),
+        extrayendo las mismas features del audio crudo que usa esta app en
+        inferencia para evitar desajustes entre entrenamiento y producción.
+      </p>
+    </details>
+
+    <details class="about-model">
+      <summary>Cómo funciona y características</summary>
+      <ol>
+        <li>Subes un archivo de audio (.wav, .mp3, .flac, .ogg, .m4a).</li>
+        <li>El backend extrae automáticamente un fragmento representativo y
+          calcula sus características acústicas con <code>openSMILE</code>.</li>
+        <li>El modelo procesa la secuencia de características con capas
+          convolucionales y una BiLSTM con Attention, que aprende a enfocarse
+          en los tramos más relevantes de la canción.</li>
+        <li>Devuelve una probabilidad para cada emoción (Alegre, Neutra,
+          Triste); la de mayor probabilidad se muestra como resultado.</li>
+      </ol>
+      <p>
+        Todo el análisis ocurre en local: el audio no se envía a ningún
+        servicio externo. El resultado suele tardar entre 10 y 30 segundos,
+        según la duración y el formato del archivo.
+      </p>
+    </details>
+  </main>
+
+  <script src="/static/script.js"></script>
+</body>
+</html>

@@ -1,0 +1,25 @@
+# Datasets (descargados aparte, no versionados)
+DEAM_Annotations/
+DEAM_Features/
+DEAM_audio/
+
+# Entornos virtuales / dependencias
+venv/
+.venv/
+__pycache__/
+*.pyc
+
+# Artefactos de ejecución
+webapp/temp_uploads/*
+!webapp/temp_uploads/.gitkeep
+uvicorn.log
+*.log
+
+# Notebooks checkpoints
+.ipynb_checkpoints/
+
+# Claude Code
+.claude/
+
+# IDE
+.vscode/
