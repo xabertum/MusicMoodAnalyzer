@@ -1,7 +1,8 @@
+import audiofile
 import numpy as np
 import opensmile
 
-from .config import MAX_SEQ_LEN, NUM_FEATURES_PER_FRAME
+from .config import MAX_AUDIO_DURATION_SECONDS, MAX_SEQ_LEN, NUM_FEATURES_PER_FRAME
 
 # Instancia costosa (carga config nativa de openSMILE): se crea una sola vez al importar
 # el modulo, replicando el mismo FeatureSet/FeatureLevel usado en el notebook de entrenamiento.
@@ -13,8 +14,16 @@ _smile = opensmile.Smile(
 
 def extract_features(file_path: str) -> np.ndarray:
     """Extrae features con openSMILE y las ajusta a la forma (1, MAX_SEQ_LEN, NUM_FEATURES_PER_FRAME)
-    que espera el modelo (mismo pipeline usado para entrenar: sin relleno de columnas, ya coinciden)."""
-    features = _smile.process_file(file_path)
+    que espera el modelo (mismo pipeline usado para entrenar: sin relleno de columnas, ya coinciden).
+
+    Solo se lee y decodifica el primer MAX_AUDIO_DURATION_SECONDS del audio (en vez de la pista
+    entera) via `audiofile.read(..., duration=...)`: como igualmente solo usamos los primeros
+    MAX_SEQ_LEN frames, analizar una canción de varios minutos completa desperdiciaba memoria y
+    CPU sin cambiar el resultado (ver MAX_AUDIO_DURATION_SECONDS en config.py)."""
+    signal, sampling_rate = audiofile.read(
+        file_path, duration=MAX_AUDIO_DURATION_SECONDS, always_2d=True
+    )
+    features = _smile.process_signal(signal, sampling_rate)
     seq = features.select_dtypes(include=[np.number]).values
 
     assert seq.shape[1] == NUM_FEATURES_PER_FRAME, (

@@ -4,4 +4,5 @@ python-multipart
 keras
 torch
 opensmile
+audiofile
 numpy
