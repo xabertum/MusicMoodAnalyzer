@@ -14,8 +14,8 @@ FROM python:3.11-slim
 WORKDIR /code
 
 # Model artifacts + webapp source (paths are resolved relative to this layout
-# by webapp/app/config.py, so keep the model files at the repo root).
-COPY modelo_emocion_atencion.keras label_encoder.pkl ./
+# by webapp/app/config.py, so keep the model file at the repo root).
+COPY modelo_emocion_atencion.keras ./
 COPY webapp ./webapp
 
 # Install the CPU-only PyTorch wheel first: the default PyPI wheel bundles the
@@ -30,6 +30,15 @@ RUN pip install --no-cache-dir --index-url https://download.pytorch.org/whl/cpu 
 # dependency), matching how the model was trained/exported.
 ENV KERAS_BACKEND=torch
 ENV PYTHONUNBUFFERED=1
+
+# Limit BLAS/OpenMP thread pools to 1: on memory-constrained hosts (e.g.
+# Render's 512 MB free tier), torch/numpy spinning up one thread per visible
+# CPU core each allocates its own scratch buffers, which adds up fast without
+# actually speeding up single-request inference on a shared vCPU.
+ENV OMP_NUM_THREADS=1
+ENV MKL_NUM_THREADS=1
+ENV OPENBLAS_NUM_THREADS=1
+ENV TORCH_NUM_THREADS=1
 
 WORKDIR /code/webapp
 

@@ -3,6 +3,5 @@ uvicorn[standard]
 python-multipart
 keras
 torch
-scikit-learn
 opensmile
 numpy
